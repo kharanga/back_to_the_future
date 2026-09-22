@@ -1,0 +1,97 @@
+[
+  {
+    "filename": "Champion_70_1.jpg",
+    "brand": "Champion",
+    "era": "70s"
+  },
+  {
+    "filename": "Champion_90_1.jpg",
+    "brand": "Champion",
+    "era": "90s"
+  },
+  {
+    "filename": "Champion_00_1.jpg",
+    "brand": "Champion",
+    "era": "00s"
+  },
+  {
+    "filename": "Hanes_70_1.jpg",
+    "brand": "Hanes",
+    "era": "70s"
+  },
+  {
+    "filename": "Hanes_80_1.jpg",
+    "brand": "Hanes",
+    "era": "80s"
+  },
+  {
+    "filename": "Murina_90_1.jpg",
+    "brand": "Murina",
+    "era": "90s"
+  },
+  {
+    "filename": "Nike_00_1.png",
+    "brand": "Nike",
+    "era": "00s"
+  },
+  {
+    "filename": "ScreenStars_80_1.jpg",
+    "brand": "Screen Stars",
+    "era": "80s"
+  },
+  {
+    "filename": "ScreenStars_80_2.jpg",
+    "brand": "Screen Stars",
+    "era": "80s"
+  },
+  {
+    "filename": "ScreenStars_90_1.jpg",
+    "brand": "Screen Stars",
+    "era": "90s"
+  },
+  {
+    "filename": "ScreenStars_00_1.jpg",
+    "brand": "Screen Stars",
+    "era": "00s"
+  },
+  {
+    "filename": "Gildan_00_1.png",
+    "brand": "Gildan",
+    "era": "00s"
+  },
+  {
+    "filename": "Gildan_00_2.png",
+    "brand": "Gildan",
+    "era": "00s"
+  },
+  {
+    "filename": "FruitOfTheLoom_90_1.jpg",
+    "brand": "Fruit of the Loom",
+    "era": "90s"
+  },
+  {
+    "filename": "AllSport_90_1.jpg",
+    "brand": "All Sport",
+    "era": "90s"
+  },
+  {
+    "filename": "Oneita_90_1.jpg",
+    "brand": "Oneita",
+    "era": "90s"
+  },
+  {
+    "filename": "TennesseeRiver_90_1.png",
+    "brand": "Tennessee River",
+    "era": "90s"
+  },
+  {
+    "filename": "TennesseeRiver_00_1.jpg",
+    "brand": "Tennessee River",
+    "era": "00s"
+  },
+  {
+    "filename": "RussellAthletic_90_1.png",
+    "brand": "Russell Athletic",
+    "era": "90s"
+  }
+]

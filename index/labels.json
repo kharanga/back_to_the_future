@@ -1,0 +1,852 @@
+[
+  {
+    "filename": "AllSport/90_1.PNG",
+    "brand": "All Sport",
+    "era": "90s"
+  },
+  {
+    "filename": "AllSport/90_2.PNG",
+    "brand": "All Sport",
+    "era": "90s"
+  },
+  {
+    "filename": "AllSport/90_3.PNG",
+    "brand": "All Sport",
+    "era": "90s"
+  },
+  {
+    "filename": "Champion/00_1.jpeg",
+    "brand": "Champion",
+    "era": "00s"
+  },
+  {
+    "filename": "Champion/00_2.jpeg",
+    "brand": "Champion",
+    "era": "00s"
+  },
+  {
+    "filename": "Champion/00_3.jpeg",
+    "brand": "Champion",
+    "era": "00s"
+  },
+  {
+    "filename": "Champion/00_4.jpeg",
+    "brand": "Champion",
+    "era": "00s"
+  },
+  {
+    "filename": "Champion/00_5.jpeg",
+    "brand": "Champion",
+    "era": "00s"
+  },
+  {
+    "filename": "Champion/00_6.jpeg",
+    "brand": "Champion",
+    "era": "00s"
+  },
+  {
+    "filename": "Champion/00_7.png",
+    "brand": "Champion",
+    "era": "00s"
+  },
+  {
+    "filename": "Champion/00_8.jpg",
+    "brand": "Champion",
+    "era": "00s"
+  },
+  {
+    "filename": "Champion/70_1.jpeg",
+    "brand": "Champion",
+    "era": "70s"
+  },
+  {
+    "filename": "Champion/70_2.jpeg",
+    "brand": "Champion",
+    "era": "70s"
+  },
+  {
+    "filename": "Champion/70_3.jpeg",
+    "brand": "Champion",
+    "era": "70s"
+  },
+  {
+    "filename": "Champion/70_4.jpeg",
+    "brand": "Champion",
+    "era": "70s"
+  },
+  {
+    "filename": "Champion/70_5.jpeg",
+    "brand": "Champion",
+    "era": "70s"
+  },
+  {
+    "filename": "Champion/70_6.jpeg",
+    "brand": "Champion",
+    "era": "70s"
+  },
+  {
+    "filename": "Champion/80_1.jpeg",
+    "brand": "Champion",
+    "era": "80s"
+  },
+  {
+    "filename": "Champion/80_2.jpeg",
+    "brand": "Champion",
+    "era": "80s"
+  },
+  {
+    "filename": "Champion/80_3.jpg",
+    "brand": "Champion",
+    "era": "80s"
+  },
+  {
+    "filename": "Champion/80_4.jpeg",
+    "brand": "Champion",
+    "era": "80s"
+  },
+  {
+    "filename": "Champion/80_5.jpeg",
+    "brand": "Champion",
+    "era": "80s"
+  },
+  {
+    "filename": "Champion/80_6.jpeg",
+    "brand": "Champion",
+    "era": "80s"
+  },
+  {
+    "filename": "Champion/90_1.jpeg",
+    "brand": "Champion",
+    "era": "90s"
+  },
+  {
+    "filename": "Champion/90_2.jpeg",
+    "brand": "Champion",
+    "era": "90s"
+  },
+  {
+    "filename": "Champion/90_3.jpg",
+    "brand": "Champion",
+    "era": "90s"
+  },
+  {
+    "filename": "Champion/90_4.jpg",
+    "brand": "Champion",
+    "era": "90s"
+  },
+  {
+    "filename": "Champion/90_5.jpg",
+    "brand": "Champion",
+    "era": "90s"
+  },
+  {
+    "filename": "Champion/90_6.png",
+    "brand": "Champion",
+    "era": "90s"
+  },
+  {
+    "filename": "Champion/90_7.jpeg",
+    "brand": "Champion",
+    "era": "90s"
+  },
+  {
+    "filename": "Champion/90_8.jpg",
+    "brand": "Champion",
+    "era": "90s"
+  },
+  {
+    "filename": "FruitOfTheLoom/90_1.PNG",
+    "brand": "Fruit Of The Loom",
+    "era": "90s"
+  },
+  {
+    "filename": "FruitOfTheLoom/90_2.PNG",
+    "brand": "Fruit Of The Loom",
+    "era": "90s"
+  },
+  {
+    "filename": "FruitOfTheLoom/90_3.PNG",
+    "brand": "Fruit Of The Loom",
+    "era": "90s"
+  },
+  {
+    "filename": "FruitOfTheLoom/90_4.PNG",
+    "brand": "Fruit Of The Loom",
+    "era": "90s"
+  },
+  {
+    "filename": "FruitOfTheLoom/90_5.PNG",
+    "brand": "Fruit Of The Loom",
+    "era": "90s"
+  },
+  {
+    "filename": "Giant/00_1.JPG",
+    "brand": "Giant",
+    "era": "00s"
+  },
+  {
+    "filename": "Giant/00_2.JPG",
+    "brand": "Giant",
+    "era": "00s"
+  },
+  {
+    "filename": "Giant/00_3.JPG",
+    "brand": "Giant",
+    "era": "00s"
+  },
+  {
+    "filename": "Giant/90_1.PNG",
+    "brand": "Giant",
+    "era": "90s"
+  },
+  {
+    "filename": "Giant/90_2.JPG",
+    "brand": "Giant",
+    "era": "90s"
+  },
+  {
+    "filename": "Giant/90_3.JPG",
+    "brand": "Giant",
+    "era": "90s"
+  },
+  {
+    "filename": "Gildan/00_1.JPG",
+    "brand": "Gildan",
+    "era": "00s"
+  },
+  {
+    "filename": "Gildan/00_2.jpeg",
+    "brand": "Gildan",
+    "era": "00s"
+  },
+  {
+    "filename": "Gildan/00_3.JPG",
+    "brand": "Gildan",
+    "era": "00s"
+  },
+  {
+    "filename": "Gildan/00_4.JPG",
+    "brand": "Gildan",
+    "era": "00s"
+  },
+  {
+    "filename": "Gildan/00_5.JPG",
+    "brand": "Gildan",
+    "era": "00s"
+  },
+  {
+    "filename": "Gildan/00_6.JPG",
+    "brand": "Gildan",
+    "era": "00s"
+  },
+  {
+    "filename": "Gildan/90_1.JPG",
+    "brand": "Gildan",
+    "era": "90s"
+  },
+  {
+    "filename": "Gildan/90_2.JPG",
+    "brand": "Gildan",
+    "era": "90s"
+  },
+  {
+    "filename": "Gildan/90_3.JPG",
+    "brand": "Gildan",
+    "era": "90s"
+  },
+  {
+    "filename": "Hanes/70_1.jpg",
+    "brand": "Hanes",
+    "era": "70s"
+  },
+  {
+    "filename": "Hanes/70_2.jpeg",
+    "brand": "Hanes",
+    "era": "70s"
+  },
+  {
+    "filename": "Hanes/70_3.jpg",
+    "brand": "Hanes",
+    "era": "70s"
+  },
+  {
+    "filename": "Hanes/80_1.jpg",
+    "brand": "Hanes",
+    "era": "80s"
+  },
+  {
+    "filename": "Hanes/80_2.jpg",
+    "brand": "Hanes",
+    "era": "80s"
+  },
+  {
+    "filename": "Hanes/80_3.jpg",
+    "brand": "Hanes",
+    "era": "80s"
+  },
+  {
+    "filename": "Hanes/80_4.jpg",
+    "brand": "Hanes",
+    "era": "80s"
+  },
+  {
+    "filename": "Hanes/80_5.jpeg",
+    "brand": "Hanes",
+    "era": "80s"
+  },
+  {
+    "filename": "Hanes/80_6.jpg",
+    "brand": "Hanes",
+    "era": "80s"
+  },
+  {
+    "filename": "Hanes/80_7.jpg",
+    "brand": "Hanes",
+    "era": "80s"
+  },
+  {
+    "filename": "Hanes/80_8.jpg",
+    "brand": "Hanes",
+    "era": "80s"
+  },
+  {
+    "filename": "Hanes/80_9.jpg",
+    "brand": "Hanes",
+    "era": "80s"
+  },
+  {
+    "filename": "Hanes/90_1.jpg",
+    "brand": "Hanes",
+    "era": "90s"
+  },
+  {
+    "filename": "Hanes/90_10.jpg",
+    "brand": "Hanes",
+    "era": "90s"
+  },
+  {
+    "filename": "Hanes/90_12.jpg",
+    "brand": "Hanes",
+    "era": "90s"
+  },
+  {
+    "filename": "Hanes/90_13.jpg",
+    "brand": "Hanes",
+    "era": "90s"
+  },
+  {
+    "filename": "Hanes/90_2.jpg",
+    "brand": "Hanes",
+    "era": "90s"
+  },
+  {
+    "filename": "Hanes/90_3.jpg",
+    "brand": "Hanes",
+    "era": "90s"
+  },
+  {
+    "filename": "Hanes/90_4.jpg",
+    "brand": "Hanes",
+    "era": "90s"
+  },
+  {
+    "filename": "Hanes/90_5.jpg",
+    "brand": "Hanes",
+    "era": "90s"
+  },
+  {
+    "filename": "Hanes/90_6.jpg",
+    "brand": "Hanes",
+    "era": "90s"
+  },
+  {
+    "filename": "Hanes/90_7.jpeg",
+    "brand": "Hanes",
+    "era": "90s"
+  },
+  {
+    "filename": "Hanes/90_8.jpeg",
+    "brand": "Hanes",
+    "era": "90s"
+  },
+  {
+    "filename": "Hanes/90_9.jpg",
+    "brand": "Hanes",
+    "era": "90s"
+  },
+  {
+    "filename": "Jerzees/80_1.PNG",
+    "brand": "Jerzees",
+    "era": "80s"
+  },
+  {
+    "filename": "Jerzees/80_2.PNG",
+    "brand": "Jerzees",
+    "era": "80s"
+  },
+  {
+    "filename": "Jerzees/80_3.PNG",
+    "brand": "Jerzees",
+    "era": "80s"
+  },
+  {
+    "filename": "Jerzees/90_1.PNG",
+    "brand": "Jerzees",
+    "era": "90s"
+  },
+  {
+    "filename": "Jerzees/90_2.PNG",
+    "brand": "Jerzees",
+    "era": "90s"
+  },
+  {
+    "filename": "Jerzees/90_3.PNG",
+    "brand": "Jerzees",
+    "era": "90s"
+  },
+  {
+    "filename": "Jerzees/90_4.PNG",
+    "brand": "Jerzees",
+    "era": "90s"
+  },
+  {
+    "filename": "Jerzees/90_5.PNG",
+    "brand": "Jerzees",
+    "era": "90s"
+  },
+  {
+    "filename": "Jerzees/90_6.PNG",
+    "brand": "Jerzees",
+    "era": "90s"
+  },
+  {
+    "filename": "Jerzees/90_7.PNG",
+    "brand": "Jerzees",
+    "era": "90s"
+  },
+  {
+    "filename": "Jerzees/90_8.PNG",
+    "brand": "Jerzees",
+    "era": "90s"
+  },
+  {
+    "filename": "Miller/80_1.JPG",
+    "brand": "Miller",
+    "era": "80s"
+  },
+  {
+    "filename": "Miller/80_2.JPG",
+    "brand": "Miller",
+    "era": "80s"
+  },
+  {
+    "filename": "Miller/80_3.PNG",
+    "brand": "Miller",
+    "era": "80s"
+  },
+  {
+    "filename": "Miller/90_1.PNG",
+    "brand": "Miller",
+    "era": "90s"
+  },
+  {
+    "filename": "Miller/90_2.JPG",
+    "brand": "Miller",
+    "era": "90s"
+  },
+  {
+    "filename": "Miller/90_3.JPG",
+    "brand": "Miller",
+    "era": "90s"
+  },
+  {
+    "filename": "Murina/00_1.JPG",
+    "brand": "Murina",
+    "era": "00s"
+  },
+  {
+    "filename": "Murina/00_2.PNG",
+    "brand": "Murina",
+    "era": "00s"
+  },
+  {
+    "filename": "Murina/90_1.PNG",
+    "brand": "Murina",
+    "era": "90s"
+  },
+  {
+    "filename": "Murina/90_2.PNG",
+    "brand": "Murina",
+    "era": "90s"
+  },
+  {
+    "filename": "Murina/90_3.JPG",
+    "brand": "Murina",
+    "era": "90s"
+  },
+  {
+    "filename": "Nike/00_1.png",
+    "brand": "Nike",
+    "era": "00s"
+  },
+  {
+    "filename": "Nike/00_2.png",
+    "brand": "Nike",
+    "era": "00s"
+  },
+  {
+    "filename": "Nike/00_3.png",
+    "brand": "Nike",
+    "era": "00s"
+  },
+  {
+    "filename": "Nike/00_4.png",
+    "brand": "Nike",
+    "era": "00s"
+  },
+  {
+    "filename": "Nike/00_5.jpg",
+    "brand": "Nike",
+    "era": "00s"
+  },
+  {
+    "filename": "Nike/00_6.jpg",
+    "brand": "Nike",
+    "era": "00s"
+  },
+  {
+    "filename": "Nike/00_7.jpg",
+    "brand": "Nike",
+    "era": "00s"
+  },
+  {
+    "filename": "Nike/00_8.png",
+    "brand": "Nike",
+    "era": "00s"
+  },
+  {
+    "filename": "Nike/00_9.jpg",
+    "brand": "Nike",
+    "era": "00s"
+  },
+  {
+    "filename": "Nike/70_1.png",
+    "brand": "Nike",
+    "era": "70s"
+  },
+  {
+    "filename": "Nike/70_2.jpg",
+    "brand": "Nike",
+    "era": "70s"
+  },
+  {
+    "filename": "Nike/70_3.png",
+    "brand": "Nike",
+    "era": "70s"
+  },
+  {
+    "filename": "Nike/70_4.jpg",
+    "brand": "Nike",
+    "era": "70s"
+  },
+  {
+    "filename": "Nike/70_5.png",
+    "brand": "Nike",
+    "era": "70s"
+  },
+  {
+    "filename": "Nike/80_1.png",
+    "brand": "Nike",
+    "era": "80s"
+  },
+  {
+    "filename": "Nike/80_2.png",
+    "brand": "Nike",
+    "era": "80s"
+  },
+  {
+    "filename": "Nike/80_3.png",
+    "brand": "Nike",
+    "era": "80s"
+  },
+  {
+    "filename": "Nike/90_1.png",
+    "brand": "Nike",
+    "era": "90s"
+  },
+  {
+    "filename": "Nike/90_10.png",
+    "brand": "Nike",
+    "era": "90s"
+  },
+  {
+    "filename": "Nike/90_2.png",
+    "brand": "Nike",
+    "era": "90s"
+  },
+  {
+    "filename": "Nike/90_3.png",
+    "brand": "Nike",
+    "era": "90s"
+  },
+  {
+    "filename": "Nike/90_4.png",
+    "brand": "Nike",
+    "era": "90s"
+  },
+  {
+    "filename": "Nike/90_5.png",
+    "brand": "Nike",
+    "era": "90s"
+  },
+  {
+    "filename": "Nike/90_6.png",
+    "brand": "Nike",
+    "era": "90s"
+  },
+  {
+    "filename": "Nike/90_7.png",
+    "brand": "Nike",
+    "era": "90s"
+  },
+  {
+    "filename": "Nike/90_8.png",
+    "brand": "Nike",
+    "era": "90s"
+  },
+  {
+    "filename": "Nike/90_9.png",
+    "brand": "Nike",
+    "era": "90s"
+  },
+  {
+    "filename": "Oneita/90_1.PNG",
+    "brand": "Oneita",
+    "era": "90s"
+  },
+  {
+    "filename": "Oneita/90_2.PNG",
+    "brand": "Oneita",
+    "era": "90s"
+  },
+  {
+    "filename": "Oneita/90_3.PNG",
+    "brand": "Oneita",
+    "era": "90s"
+  },
+  {
+    "filename": "Oneita/90_4.PNG",
+    "brand": "Oneita",
+    "era": "90s"
+  },
+  {
+    "filename": "RussellAthletic/00_1.JPG",
+    "brand": "Russell Athletic",
+    "era": "00s"
+  },
+  {
+    "filename": "RussellAthletic/00_2.jpeg",
+    "brand": "Russell Athletic",
+    "era": "00s"
+  },
+  {
+    "filename": "RussellAthletic/70_1.JPG",
+    "brand": "Russell Athletic",
+    "era": "70s"
+  },
+  {
+    "filename": "RussellAthletic/70_2.JPG",
+    "brand": "Russell Athletic",
+    "era": "70s"
+  },
+  {
+    "filename": "RussellAthletic/80_1.PNG",
+    "brand": "Russell Athletic",
+    "era": "80s"
+  },
+  {
+    "filename": "RussellAthletic/80_2.PNG",
+    "brand": "Russell Athletic",
+    "era": "80s"
+  },
+  {
+    "filename": "RussellAthletic/80_3.PNG",
+    "brand": "Russell Athletic",
+    "era": "80s"
+  },
+  {
+    "filename": "RussellAthletic/80_4.PNG",
+    "brand": "Russell Athletic",
+    "era": "80s"
+  },
+  {
+    "filename": "RussellAthletic/90_1.jpeg",
+    "brand": "Russell Athletic",
+    "era": "90s"
+  },
+  {
+    "filename": "RussellAthletic/90_2.JPG",
+    "brand": "Russell Athletic",
+    "era": "90s"
+  },
+  {
+    "filename": "RussellAthletic/90_3.jpeg",
+    "brand": "Russell Athletic",
+    "era": "90s"
+  },
+  {
+    "filename": "RussellAthletic/90_4.JPG",
+    "brand": "Russell Athletic",
+    "era": "90s"
+  },
+  {
+    "filename": "ScreenStars/00_1.jpg",
+    "brand": "Screen Stars",
+    "era": "00s"
+  },
+  {
+    "filename": "ScreenStars/00_2.jpg",
+    "brand": "Screen Stars",
+    "era": "00s"
+  },
+  {
+    "filename": "ScreenStars/00_3.jpg",
+    "brand": "Screen Stars",
+    "era": "00s"
+  },
+  {
+    "filename": "ScreenStars/00_4.jpg",
+    "brand": "Screen Stars",
+    "era": "00s"
+  },
+  {
+    "filename": "ScreenStars/80_1.PNG",
+    "brand": "Screen Stars",
+    "era": "80s"
+  },
+  {
+    "filename": "ScreenStars/80_2.PNG",
+    "brand": "Screen Stars",
+    "era": "80s"
+  },
+  {
+    "filename": "ScreenStars/80_3.PNG",
+    "brand": "Screen Stars",
+    "era": "80s"
+  },
+  {
+    "filename": "ScreenStars/80_4.PNG",
+    "brand": "Screen Stars",
+    "era": "80s"
+  },
+  {
+    "filename": "ScreenStars/90_1.PNG",
+    "brand": "Screen Stars",
+    "era": "90s"
+  },
+  {
+    "filename": "ScreenStars/90_2.PNG",
+    "brand": "Screen Stars",
+    "era": "90s"
+  },
+  {
+    "filename": "ScreenStars/90_3.JPG",
+    "brand": "Screen Stars",
+    "era": "90s"
+  },
+  {
+    "filename": "Sportswear/80_1.PNG",
+    "brand": "Sportswear",
+    "era": "80s"
+  },
+  {
+    "filename": "Sportswear/80_2.PNG",
+    "brand": "Sportswear",
+    "era": "80s"
+  },
+  {
+    "filename": "Sportswear/80_3.PNG",
+    "brand": "Sportswear",
+    "era": "80s"
+  },
+  {
+    "filename": "TennesseeRiver/00_1.PNG",
+    "brand": "Tennessee River",
+    "era": "00s"
+  },
+  {
+    "filename": "TennesseeRiver/00_2.JPG",
+    "brand": "Tennessee River",
+    "era": "00s"
+  },
+  {
+    "filename": "TennesseeRiver/00_3.JPG",
+    "brand": "Tennessee River",
+    "era": "00s"
+  },
+  {
+    "filename": "TennesseeRiver/00_4.JPG",
+    "brand": "Tennessee River",
+    "era": "00s"
+  },
+  {
+    "filename": "TennesseeRiver/00_5.JPG",
+    "brand": "Tennessee River",
+    "era": "00s"
+  },
+  {
+    "filename": "TennesseeRiver/00_6.JPG",
+    "brand": "Tennessee River",
+    "era": "00s"
+  },
+  {
+    "filename": "TennesseeRiver/80_1.JPG",
+    "brand": "Tennessee River",
+    "era": "80s"
+  },
+  {
+    "filename": "TennesseeRiver/80_2.JPG",
+    "brand": "Tennessee River",
+    "era": "80s"
+  },
+  {
+    "filename": "TennesseeRiver/80_3.JPG",
+    "brand": "Tennessee River",
+    "era": "80s"
+  },
+  {
+    "filename": "TennesseeRiver/90_1.PNG",
+    "brand": "Tennessee River",
+    "era": "90s"
+  },
+  {
+    "filename": "TennesseeRiver/90_2.JPG",
+    "brand": "Tennessee River",
+    "era": "90s"
+  },
+  {
+    "filename": "TennesseeRiver/90_3.JPG",
+    "brand": "Tennessee River",
+    "era": "90s"
+  },
+  {
+    "filename": "TennesseeRiver/90_4.JPG",
+    "brand": "Tennessee River",
+    "era": "90s"
+  },
+  {
+    "filename": "TennesseeRiver/90_5.JPG",
+    "brand": "Tennessee River",
+    "era": "90s"
+  },
+  {
+    "filename": "Trench/80_1.PNG",
+    "brand": "Trench",
+    "era": "80s"
+  },
+  {
+    "filename": "Trench/80_2.PNG",
+    "brand": "Trench",
+    "era": "80s"
+  }
+]
