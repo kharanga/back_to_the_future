@@ -1,0 +1,8 @@
+pillow
+pydantic
+torch
+torchvision
+weaviate-client
+pg8000
+boto3
+python-dotenv
