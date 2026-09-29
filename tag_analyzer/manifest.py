@@ -3,20 +3,12 @@ import re
 import sys
 from pathlib import Path
 
-TAGS_DIR = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("data/tags")
-OUT_FILE = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("data/labels.json")
-IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
+from tag_analyzer import LIBRARY_DIR, LABELS_MANIFEST, IMAGE_SUFFIXES
 
-BRAND_OVERRIDES = {
-    "TennesseeRiver": "Tennessee River",
-    "ScreenStars": "Screen Stars",
-    "RussellAthletic": "Russell Athletic",
-}
-
+TAGS_DIR = Path(sys.argv[1]) if len(sys.argv) > 1 else LIBRARY_DIR
+OUT_FILE = Path(sys.argv[2]) if len(sys.argv) > 2 else LABELS_MANIFEST
 
 def to_brand(token: str) -> str:
-    if token in BRAND_OVERRIDES:
-        return BRAND_OVERRIDES[token]
     token = token.replace("_", " ")
     token = re.sub(r"(?<!^)(?=[A-Z])", " ", token)
     return re.sub(r"\s+", " ", token).strip().title()
