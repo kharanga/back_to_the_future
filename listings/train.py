@@ -1,10 +1,10 @@
 import json
 from pathlib import Path
 
-from PIL import Image
-from trl import SFTConfig, SFTTrainer
 from unsloth import FastVisionModel, is_bf16_supported
 from unsloth.trainer import UnslothVisionDataCollator
+from PIL import Image
+from trl import SFTConfig, SFTTrainer
 
 from listings import ADAPTER_DIR, PROJECT_ROOT, TRAIN_FILE
 from listings.model import SEED, add_lora_to_language_layers, load_base_model
