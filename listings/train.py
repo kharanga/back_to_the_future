@@ -4,6 +4,7 @@ from pathlib import Path
 from unsloth import FastVisionModel, is_bf16_supported
 from unsloth.trainer import UnslothVisionDataCollator
 from PIL import Image
+from torch.utils.data import Dataset
 from trl import SFTConfig, SFTTrainer
 
 from listings import ADAPTER_DIR, PROJECT_ROOT, TRAIN_FILE
@@ -42,12 +43,15 @@ def trainable_conversation(example: dict) -> dict:
     }
 
 
-class LoadPhotosPerBatchCollator:
-    def __init__(self, vision_collator):
-        self.vision_collator = vision_collator
+class PhotosLoadedOnAccess(Dataset):
+    def __init__(self, examples: list[dict]):
+        self.examples = examples
 
-    def __call__(self, examples: list[dict]):
-        return self.vision_collator([trainable_conversation(example) for example in examples])
+    def __len__(self) -> int:
+        return len(self.examples)
+
+    def __getitem__(self, index: int) -> dict:
+        return trainable_conversation(self.examples[index])
 
 
 def training_config() -> SFTConfig:
@@ -75,7 +79,7 @@ def training_config() -> SFTConfig:
 
 
 def main():
-    examples = read_jsonl(TRAIN_FILE)
+    examples = PhotosLoadedOnAccess(read_jsonl(TRAIN_FILE))
     print(f"training examples: {len(examples)}")
 
     model, tokenizer = load_base_model()
@@ -85,7 +89,7 @@ def main():
     trainer = SFTTrainer(
         model=model,
         processing_class=tokenizer,
-        data_collator=LoadPhotosPerBatchCollator(UnslothVisionDataCollator(model, tokenizer)),
+        data_collator=UnslothVisionDataCollator(model, tokenizer),
         train_dataset=examples,
         args=training_config(),
     )
