@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 
 from listings import EVAL_FILE, PROJECT_ROOT, VAL_FILE
