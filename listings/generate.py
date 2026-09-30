@@ -1,8 +1,10 @@
 from PIL import Image
+from transformers.utils import logging as transformers_logging
 
 from listings.parse import prompt_text
 
 MAX_NEW_TOKENS = 40
+transformers_logging.set_verbosity_error()
 
 
 def generation_messages(facts: dict) -> list[dict]:
