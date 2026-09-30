@@ -42,6 +42,14 @@ def trainable_conversation(example: dict) -> dict:
     }
 
 
+class LoadPhotosPerBatchCollator:
+    def __init__(self, vision_collator):
+        self.vision_collator = vision_collator
+
+    def __call__(self, examples: list[dict]):
+        return self.vision_collator([trainable_conversation(example) for example in examples])
+
+
 def training_config() -> SFTConfig:
     return SFTConfig(
         output_dir=str(CHECKPOINT_DIR),
@@ -67,7 +75,7 @@ def training_config() -> SFTConfig:
 
 
 def main():
-    examples = [trainable_conversation(example) for example in read_jsonl(TRAIN_FILE)]
+    examples = read_jsonl(TRAIN_FILE)
     print(f"training examples: {len(examples)}")
 
     model, tokenizer = load_base_model()
@@ -77,7 +85,7 @@ def main():
     trainer = SFTTrainer(
         model=model,
         processing_class=tokenizer,
-        data_collator=UnslothVisionDataCollator(model, tokenizer),
+        data_collator=LoadPhotosPerBatchCollator(UnslothVisionDataCollator(model, tokenizer)),
         train_dataset=examples,
         args=training_config(),
     )
