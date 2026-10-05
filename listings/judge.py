@@ -11,7 +11,8 @@ from listings.examples import facts, read_jsonl
 
 JUDGE_MODEL = "claude-haiku-4-5"
 MAX_TOKENS = 1024
-CHECK_NAMES = ["same_item", "brand_agrees", "era_agrees", "nothing_invented", "key_details_kept"]
+CHECK_NAMES = ["same_item", "brand_agrees", "era_agrees"]
+NO_DETAILS = "none"
 OVERALL_VALUES = ["equivalent", "acceptable", "wrong"]
 LOWEST_SIMILARITY = 1
 HIGHEST_SIMILARITY = 100
@@ -32,9 +33,17 @@ Answer every field:
 - same_item: true when the generated line is about the same kind of garment as the shop's line (a hoodie and a hoodie, not a hoodie and a jacket).
 - brand_agrees: true when the brand is handled the same way: both lines name the same brand, or both leave the brand out. The shop sometimes leaves the brand out on purpose, so the facts naming a brand does not mean the line must.
 - era_agrees: true when both lines give the same decade, or both leave it out. "Y2K" and "2000's" are the same decade.
-- nothing_invented: true when the generated line states no specific that the shop's line lacks, such as a fit number, a team, a graphic, a size or a material.
-- key_details_kept: true when nothing the shop included is missing from the generated line, such as a wash, a fit, a color or a graphic.
-- similarity: a whole number from 1 to 100 for how closely the generated line matches the shop's line.
+- details_added: a list of each specific the generated line states that the shop's line does not: a color, pattern, material, fit, fit or model number, team, graphic, size, or condition word. Write each one in the generated line's own words. An empty list when there is nothing.
+- details_dropped: a list of each specific the shop's line states that the generated line does not, written in the shop's own words. An empty list when there is nothing.
+  A changed value goes in both lists: the shop says "550" and the generated line says "545" gives details_dropped ["550"] and details_added ["545"].
+  These are not differences and must not be listed in either list:
+  - restating the garment type ("Polo Shirt" for "Shirt", "Pullover Hoodie" for "Hoodie");
+  - singular versus plural ("Jean" and "Jeans");
+  - another spelling or abbreviation of the same brand ("USPA", "US Polo Assn", "U.S. Polo Assn.");
+  - the same decade written differently ("Y2K", "2000's", "00's");
+  - wording, word order, the diamond emoji, and punctuation.
+  Two identical lines have two empty lists.
+- similarity: a whole number from 1 to 100 for how closely the generated line matches the shop's line. When details_added and details_dropped are both empty, the similarity is 90 or more.
   90 to 100: a buyer learns exactly the same thing; only wording or word order differs.
   70 to 89: the same item, with one minor detail added, dropped, or changed.
   40 to 69: the same item, with several details different or missing.
@@ -50,8 +59,8 @@ class Verdict(BaseModel):
     same_item: bool
     brand_agrees: bool
     era_agrees: bool
-    nothing_invented: bool
-    key_details_kept: bool
+    details_added: list[str]
+    details_dropped: list[str]
     similarity: int = Field(ge=LOWEST_SIMILARITY, le=HIGHEST_SIMILARITY, strict=True)
     overall: Literal["equivalent", "acceptable", "wrong"]
     reason: str
@@ -169,11 +178,15 @@ def judge_summary(judged_rows: list[dict]) -> dict:
     overall_shares = {
         f"overall_{value}": sum(row["overall"] == value for row in judged_rows) / total for value in OVERALL_VALUES
     }
+    empty_list_shares = {
+        "nothing_added": sum(not row["details_added"] for row in judged_rows) / total,
+        "nothing_dropped": sum(not row["details_dropped"] for row in judged_rows) / total,
+    }
     similarity = {
         "similarity_mean": sum(row["similarity"] for row in judged_rows) / total,
         "similarity_80_or_more": sum(row["similarity"] >= HIGH_SIMILARITY for row in judged_rows) / total,
     }
-    return {**check_rates, **similarity, **overall_shares, "rows": total}
+    return {**check_rates, **empty_list_shares, **similarity, **overall_shares, "rows": total}
 
 
 def summary_line(name: str, value: float) -> str:
@@ -192,12 +205,17 @@ def summary_lines(summary: dict, outcomes: list[Outcome]) -> list[str]:
     ]
 
 
+def listed(details: list[str]) -> str:
+    return ", ".join(details) or NO_DETAILS
+
+
 def verdict_lines(row: dict) -> list[str]:
     failed_checks = [name for name in CHECK_NAMES if not row[name]]
     return [
         f"{row['listing_id']:>5}  shop:      {row['target']}",
         f"       generated: {row['generated']}",
         f"       verdict:   {row['overall']}, similarity {row['similarity']}/100 (failed: {', '.join(failed_checks) or 'none'})",
+        f"       added: {listed(row['details_added'])} | dropped: {listed(row['details_dropped'])}",
         f"       reason:    {row['reason']}",
         "",
     ]

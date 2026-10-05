@@ -17,6 +17,7 @@ REPORT_TO_NOTHING = "none"
 UNKNOWN_RUN_ID_PARAM = "adapter_run_id_not_found"
 BASELINE_RUN_NAME = "shop-baseline"
 JUDGE_TABLE_FILE = "judge_rows.json"
+LIST_CELL_SEPARATOR = "; "
 JUDGE_METRIC_PREFIX = "judge_"
 SIMILARITY_METRIC_PREFIX = "similarity_"
 RUBRIC_HASH_LENGTH = 12
@@ -191,8 +192,12 @@ def judge_tags(judge_model: str, rubric: str) -> dict:
     return {"judge_model": judge_model, "judge_rubric_hash": rubric_hash(rubric)}
 
 
+def table_cell(value):
+    return LIST_CELL_SEPARATOR.join(value) if isinstance(value, list) else value
+
+
 def table_of(rows: list[dict]) -> dict:
-    return {column: [row[column] for row in rows] for column in rows[0]}
+    return {column: [table_cell(row[column]) for row in rows] for column in rows[0]}
 
 
 def log_judge_run(

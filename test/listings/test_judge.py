@@ -27,6 +27,7 @@ from listings.judge import (
     judged_row,
     judged_rows_of,
     key_rejected_message,
+    listed,
     progress_line,
     request_verdict,
     response_error,
@@ -58,8 +59,8 @@ EQUIVALENT = Verdict(
     same_item=True,
     brand_agrees=True,
     era_agrees=True,
-    nothing_invented=True,
-    key_details_kept=True,
+    details_added=[],
+    details_dropped=[],
     similarity=95,
     overall="equivalent",
     reason="Same hoodie, brand and decade.",
@@ -68,8 +69,8 @@ INVENTED_FIT_NUMBER = Verdict(
     same_item=True,
     brand_agrees=True,
     era_agrees=True,
-    nothing_invented=False,
-    key_details_kept=False,
+    details_added=["550"],
+    details_dropped=["Stonewash"],
     similarity=30,
     overall="wrong",
     reason="The generated line adds a 550 fit number and drops the stonewash.",
@@ -81,8 +82,8 @@ RUSSELL_JUDGED_ROW = {
     "same_item": True,
     "brand_agrees": True,
     "era_agrees": True,
-    "nothing_invented": True,
-    "key_details_kept": True,
+    "details_added": [],
+    "details_dropped": [],
     "similarity": 95,
     "overall": "equivalent",
     "reason": "Same hoodie, brand and decade.",
@@ -94,8 +95,8 @@ LEVIS_JUDGED_ROW = {
     "same_item": True,
     "brand_agrees": True,
     "era_agrees": True,
-    "nothing_invented": False,
-    "key_details_kept": False,
+    "details_added": ["550"],
+    "details_dropped": ["Stonewash"],
     "similarity": 30,
     "overall": "wrong",
     "reason": "The generated line adds a 550 fit number and drops the stonewash.",
@@ -104,8 +105,8 @@ HALF_WRONG_SUMMARY = {
     "same_item": 1.0,
     "brand_agrees": 1.0,
     "era_agrees": 1.0,
-    "nothing_invented": 0.5,
-    "key_details_kept": 0.5,
+    "nothing_added": 0.5,
+    "nothing_dropped": 0.5,
     "similarity_mean": 62.5,
     "similarity_80_or_more": 0.5,
     "overall_equivalent": 0.5,
@@ -226,13 +227,13 @@ def judge_run_log(monkeypatch) -> list:
     return logged
 
 
-def test_verdict_lists_the_five_checks_then_similarity_overall_and_reason():
+def test_verdict_lists_the_three_checks_the_two_detail_lists_then_similarity_overall_and_reason():
     assert list(Verdict.model_fields) == [
         "same_item",
         "brand_agrees",
         "era_agrees",
-        "nothing_invented",
-        "key_details_kept",
+        "details_added",
+        "details_dropped",
         "similarity",
         "overall",
         "reason",
@@ -249,6 +250,12 @@ def test_verdict_accepts_a_similarity_at_either_end_of_one_to_one_hundred(simila
 def test_verdict_rejects_a_similarity_that_is_not_a_whole_number_from_one_to_one_hundred(similarity_not_allowed):
     with pytest.raises(ValidationError):
         Verdict(**{**EQUIVALENT.model_dump(), "similarity": similarity_not_allowed})
+
+
+@pytest.mark.parametrize("details_not_a_list_of_text", ["Striped", None, [1]])
+def test_verdict_rejects_details_that_are_not_a_list_of_text(details_not_a_list_of_text):
+    with pytest.raises(ValidationError):
+        Verdict(**{**EQUIVALENT.model_dump(), "details_added": details_not_a_list_of_text})
 
 
 def test_verdict_rejects_an_overall_value_outside_the_three_allowed():
@@ -327,8 +334,8 @@ def test_judged_row_lists_the_fields_in_reading_order():
         "same_item",
         "brand_agrees",
         "era_agrees",
-        "nothing_invented",
-        "key_details_kept",
+        "details_added",
+        "details_dropped",
         "similarity",
         "overall",
         "reason",
@@ -521,6 +528,16 @@ def test_judge_summary_gives_the_mean_similarity_and_the_share_scoring_eighty_or
     assert (summary["similarity_mean"], round(summary["similarity_80_or_more"], 3)) == (79.0, 0.667)
 
 
+def test_judge_summary_gives_the_share_of_rows_with_nothing_added_and_with_nothing_dropped():
+    rows = [
+        {**RUSSELL_JUDGED_ROW, "details_added": [], "details_dropped": []},
+        {**RUSSELL_JUDGED_ROW, "details_added": ["Striped"], "details_dropped": []},
+        {**RUSSELL_JUDGED_ROW, "details_added": ["545"], "details_dropped": ["550"]},
+    ]
+    summary = judge_summary(rows)
+    assert (round(summary["nothing_added"], 3), round(summary["nothing_dropped"], 3)) == (0.333, 0.667)
+
+
 def test_judge_summary_leaves_refused_and_failed_rows_out_of_the_rates():
     client = client_answering(verdict_response(EQUIVALENT), response_stopped_by("refusal"), CONNECTION_ERROR)
     outcomes = judge_rows(client, [RUSSELL_EVAL_ROW, LEVIS_EVAL_ROW, RUSSELL_EVAL_ROW], FACTS_BY_ID)
@@ -551,8 +568,8 @@ def test_summary_lines_are_the_rates_then_row_error_and_token_counts():
         "same_item            100.0%",
         "brand_agrees         100.0%",
         "era_agrees           100.0%",
-        "nothing_invented     50.0%",
-        "key_details_kept     50.0%",
+        "nothing_added        50.0%",
+        "nothing_dropped      50.0%",
         "similarity_mean      62.5 out of 100",
         "similarity_80_or_more 50.0%",
         "overall_equivalent   50.0%",
@@ -565,11 +582,20 @@ def test_summary_lines_are_the_rates_then_row_error_and_token_counts():
     ]
 
 
-def test_verdict_lines_show_the_shop_line_the_generated_line_the_verdict_and_the_reason():
+def test_listed_joins_the_details_with_commas():
+    assert listed(["Striped", "Big Logo"]) == "Striped, Big Logo"
+
+
+def test_listed_says_none_for_an_empty_list():
+    assert listed([]) == "none"
+
+
+def test_verdict_lines_show_the_shop_line_the_generated_line_the_verdict_the_details_and_the_reason():
     assert verdict_lines(LEVIS_JUDGED_ROW) == [
         "    8  shop:      💎 Vintage 90's Levi's Stonewash Jeans.",
         "       generated: 💎 Vintage 90's Levi's 550 Jeans.",
-        "       verdict:   wrong, similarity 30/100 (failed: nothing_invented, key_details_kept)",
+        "       verdict:   wrong, similarity 30/100 (failed: none)",
+        "       added: 550 | dropped: Stonewash",
         "       reason:    The generated line adds a 550 fit number and drops the stonewash.",
         "",
     ]
@@ -577,6 +603,15 @@ def test_verdict_lines_show_the_shop_line_the_generated_line_the_verdict_and_the
 
 def test_verdict_lines_say_none_failed_when_every_check_passed():
     assert verdict_lines(RUSSELL_JUDGED_ROW)[2] == "       verdict:   equivalent, similarity 95/100 (failed: none)"
+
+
+def test_verdict_lines_say_none_added_and_none_dropped_for_two_empty_lists():
+    assert verdict_lines(RUSSELL_JUDGED_ROW)[3] == "       added: none | dropped: none"
+
+
+def test_verdict_lines_name_only_the_yes_or_no_checks_that_failed():
+    row_with_another_brand = {**LEVIS_JUDGED_ROW, "brand_agrees": False}
+    assert verdict_lines(row_with_another_brand)[2] == "       verdict:   wrong, similarity 30/100 (failed: brand_agrees)"
 
 
 def test_error_lines_are_one_not_judged_line_per_error_row():
@@ -594,6 +629,11 @@ def test_write_judge_file_writes_one_judged_row_per_line(judge_file):
 def test_write_judge_file_writes_non_ascii_characters_unescaped(judge_file):
     write_judge_file([RUSSELL_JUDGED_ROW])
     assert '"target": "💎 Vintage 90\'s Boxy Russell Hoodie."' in judge_file.read_text(encoding="utf-8")
+
+
+def test_write_judge_file_stores_the_detail_lists_as_json_lists(judge_file):
+    write_judge_file([LEVIS_JUDGED_ROW])
+    assert '"details_added": ["550"], "details_dropped": ["Stonewash"]' in judge_file.read_text(encoding="utf-8")
 
 
 def test_row_limit_from_is_the_first_argument_as_a_number():

@@ -35,6 +35,7 @@ from listings.tracking import (
     similarity_metrics,
     start_adapter_run,
     start_training_run,
+    table_cell,
     table_of,
     tracking_enabled,
     unknown_run_params,
@@ -72,8 +73,8 @@ JUDGED_ROWS = [
         "same_item": True,
         "brand_agrees": True,
         "era_agrees": True,
-        "nothing_invented": True,
-        "key_details_kept": True,
+        "details_added": [],
+        "details_dropped": [],
         "similarity": 95,
         "overall": "equivalent",
         "reason": "Same hoodie, brand and decade.",
@@ -85,8 +86,8 @@ JUDGED_ROWS = [
         "same_item": True,
         "brand_agrees": True,
         "era_agrees": True,
-        "nothing_invented": False,
-        "key_details_kept": True,
+        "details_added": ["Swoosh", "Embroidered"],
+        "details_dropped": [],
         "similarity": 30,
         "overall": "wrong",
         "reason": "The generated line adds a swoosh graphic.",
@@ -96,8 +97,8 @@ JUDGE_SUMMARY = {
     "same_item": 1.0,
     "brand_agrees": 1.0,
     "era_agrees": 1.0,
-    "nothing_invented": 0.5,
-    "key_details_kept": 1.0,
+    "nothing_added": 0.5,
+    "nothing_dropped": 1.0,
     "similarity_mean": 62.5,
     "similarity_80_or_more": 0.5,
     "overall_equivalent": 0.5,
@@ -687,6 +688,18 @@ def test_judge_tags_are_the_judge_model_and_the_rubric_hash():
     }
 
 
+def test_table_cell_joins_a_list_into_one_text_cell():
+    assert table_cell(["Swoosh", "Embroidered"]) == "Swoosh; Embroidered"
+
+
+def test_table_cell_is_empty_text_for_an_empty_list():
+    assert table_cell([]) == ""
+
+
+def test_table_cell_leaves_any_other_value_alone():
+    assert table_cell(95) == 95
+
+
 def test_table_of_lists_each_column_of_the_first_row_across_the_rows():
     assert table_of([{"listing_id": 7, "overall": "equivalent"}, {"listing_id": 8, "overall": "wrong"}]) == {
         "listing_id": [7, 8],
@@ -696,6 +709,12 @@ def test_table_of_lists_each_column_of_the_first_row_across_the_rows():
 
 
 
+
+
+def test_table_of_turns_list_values_into_text_cells():
+    assert table_of([{"details_added": []}, {"details_added": ["Swoosh", "Embroidered"]}]) == {
+        "details_added": ["", "Swoosh; Embroidered"]
+    }
 
 
 def test_log_judge_run_does_nothing_when_tracking_is_off(tracking_off, judge_file, adapter_dir):
@@ -713,8 +732,8 @@ def test_log_judge_run_logs_every_summary_value_as_a_judge_metric(run_store, jud
         "judge_same_item": 1.0,
         "judge_brand_agrees": 1.0,
         "judge_era_agrees": 1.0,
-        "judge_nothing_invented": 0.5,
-        "judge_key_details_kept": 1.0,
+        "judge_nothing_added": 0.5,
+        "judge_nothing_dropped": 1.0,
         "judge_similarity_mean": 62.5,
         "judge_similarity_80_or_more": 0.5,
         "judge_overall_equivalent": 0.5,
