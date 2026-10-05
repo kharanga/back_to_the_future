@@ -6,3 +6,6 @@ data/listings/
 adapters/
 CLAUDE.md
 pg_backup*.dump
+handoff/
+mlruns/
+mlflow.db

@@ -6,3 +6,6 @@ weaviate-client
 pg8000
 boto3
 python-dotenv
+mlflow-skinny==3.16.1
+pandas
+anthropic==1.11.0
