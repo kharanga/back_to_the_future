@@ -45,6 +45,7 @@ Exports training data and LoRA fine-tunes Qwen2.5-VL-7B to write the 💎 line.
 | `invariants.py` | The five eval invariants, `invariant_pass_rates`, `print_summary`. | both |
 | `baseline.py` | Scores the shop's own target lines with the invariants and logs them as the `shop-baseline` run. | both |
 | `similarity.py` | The headline metric: word-level match between each generated line and the shop's line (`exact_match`, `word_overlap`). Free. | both |
+| `semantic.py` | Meaning similarity 0–100 from sentence embeddings, with a mismatched-pair floor. Free. Printed and logged by `python -m listings.similarity`. | both |
 | `judge.py` | Claude (`claude-haiku-4-5`) compares each generated line with the shop's line: five checks, an overall verdict, a reason. Writes `judge.jsonl`. | both |
 | `tracking.py` | Every MLflow call for the package: training run, adapter upload, run ID file in the adapter folder, eval scores and table. Logs nothing when tracking is off. | both |
 | `train.py` | Lazy photo dataset, `SFTTrainer` config, 3 epochs, saves the adapter. | GPU box |
@@ -61,7 +62,7 @@ State: first training run Sep 30 2026 (543 steps, ~97 min, final loss 0.13, mean
 
 ### Tests and infrastructure
 
-- `test/` holds a unit test for every function that can be imported on the laptop, written to be read as documentation: `test/listings/test_<module>.py` and `test/tag_analyzer/test_<module>.py`. Run with `python -m pytest test/` (offline, under a second; configured by `pytest.ini`, pytest from `requirements-dev.txt`). As of 2026-10-05: 596 passed. `test/test_every_function_has_a_test.py` fails the suite when a function has no test; 15 functions that only run on the GPU box are exempt (`model.py`, `generate.py`, and what is left in `train.py` and `eval.py`).
+- `test/` holds a unit test for every function that can be imported on the laptop, written to be read as documentation: `test/listings/test_<module>.py` and `test/tag_analyzer/test_<module>.py`. Run with `python -m pytest test/` (offline, under a second; configured by `pytest.ini`, pytest from `requirements-dev.txt`). As of 2026-10-05: 652 passed. `test/test_every_function_has_a_test.py` fails the suite when a function has no test; 15 functions that only run on the GPU box are exempt (`model.py`, `generate.py`, and what is left in `train.py` and `eval.py`).
 - `docs/listings.md` and `docs/tag_analyzer.md` list every function with an example input and output. The manager updates them in the same commit as a change to a function.
 - **MLflow** (plan approved 2026-10-04): every listings training run, every listings eval, and every tag analyzer eval is recorded on a tracking server on the EC2 box. `mlflow-skinny==3.16.1` is the client, installed in `.venv`. All tracking code is written and tested offline (T5, L7, L9, L8). The server has been **running on the EC2 box since 2026-10-04** (health and the experiments API answer on the public address), but no run has been logged yet: `MLFLOW_TRACKING_URI` is still blank in the laptop `.env`.
 - `docker-compose.yaml` runs Postgres 16, pgAdmin, Weaviate 1.27.0, and the `multi2vec-clip` sidecar (`clip-ViT-B-32-multilingual-v1`, CPU) on the user's EC2 instance.
@@ -252,6 +253,35 @@ Acceptance criteria:
 - A folder whose run ID is known to the server behaves as before, and its file is not rewritten.
 - `adapter_run_id_not_found` is still recorded when a file named an unknown run.
 
+**L14. Embedding similarity, 0 to 100** — DONE 2026-10-05, PASS round 1, not committed yet. Sep 30 model: semantic mean 84.2, median 84.4, mismatched floor 69.1 (manager ran it tracked; on the `first-model-2026-09-30` run).
+
+The user's decision (2026-10-05): add a semantic score on a 0–100 scale beside word overlap, because word overlap compares spelling, not meaning. This is the free half; L15 is the judge half.
+
+New laptop-importable `listings/semantic.py`; `python -m listings.similarity` prints and logs it together with the word-level numbers.
+
+Acceptance criteria:
+- The model is `sentence-transformers/all-MiniLM-L6-v2`, named once as a constant. `sentence_transformers` is imported inside the loading function only, so importing `listings.semantic`, running the tests, and every other command never load it.
+- Verified usage, do not guess others: `SentenceTransformer(MODEL_NAME).encode(list_of_strings, normalize_embeddings=True)` returns a numpy array with one row per string; with normalized vectors the cosine similarity of two rows is their dot product.
+- The text embedded for a line is the line without the 💎 and with `’` replaced by `'`, stripped of surrounding spaces. Nothing else is removed.
+- A pure function turns two vectors into the score: cosine similarity × 100, never below 0. Identical vectors give 100.
+- Scoring takes the embedder as an argument (anything with that `encode` method), embeds all lines in one call per side, and adds `semantic` to each row. Tests pass a fake embedder.
+- Mismatched reference: each generated line is also scored against the shop's line of a different row, by a fixed rotation of the rows (the same every run; no row is ever paired with itself when there are two or more rows; with one row the reference is left out). Its mean is `semantic_mismatched_mean`.
+- The summary adds `semantic_mean`, `semantic_median`, `semantic_mismatched_mean`. The command prints them after the word-level lines, then the five lowest pairs by `semantic` in the same layout as the word-overlap pairs.
+- MLflow: `similarity_semantic_mean`, `similarity_semantic_median`, `similarity_semantic_mismatched_mean` are logged with the existing `similarity_` metrics by `tracking.log_similarity_run`, to the adapter's run. Tracking off: prints only.
+- The word-level output is unchanged: on the Sep 30 `eval.jsonl` it still prints `17/160 = 10.6%`, `0.632`, `0.615`.
+- On that file the builder reports: the three semantic numbers, that the real-pair mean is above the mismatched mean, and the semantic score of the exact-match rows.
+
+**L15. Judge similarity on a 1 to 100 scale** — DONE 2026-10-05, PASS round 1. Not yet produced by Claude: the API key is still rejected (M7).
+
+Replaces the 1–5 score from L12. Replaces the 1–5 score from L12.
+
+Acceptance criteria:
+- `Verdict.similarity` is a whole number from 1 to 100, declared as an `int` with that range on the pydantic model. (Structured outputs do not support numeric ranges; the Python SDK removes the constraint from the schema it sends and validates the answer itself.) A response scoring 0 or 101 fails validation and is recorded as an error row, as other validation failures already are.
+- The rubric defines the bands: 90–100 a buyer learns exactly the same thing, only wording or word order differs; 70–89 the same item with one minor detail added, dropped, or changed; 40–69 the same item with several details different or missing; 15–39 the same kind of garment but a key fact differs (brand, era, fit or model number); 1–14 a different item.
+- `judge_summary` keeps `similarity_mean` and replaces `similarity_4_or_5` with `similarity_80_or_more` (the share of rows scoring 80 or more). MLflow names follow: `judge_similarity_mean`, `judge_similarity_80_or_more`.
+- The pilot printout shows the score as `similarity 62/100`.
+- The five checks, `overall`, and `reason` are unchanged. No real Claude call is made by the builder.
+
 **L3. Re-export, retrain, evaluate, and record the result**
 
 Blocked on: L1 and L2 committed; the user starting the GPU box. Run by the user with the builder's instructions; nothing here can be checked by the suite.
@@ -372,6 +402,8 @@ Acceptance criteria:
 
 **V8. Tests for L12** — a unit test for every new function, including the two reference word-overlap values, apostrophe and punctuation handling, the summary on a small hand-made set, and a verdict with `similarity` 0 or 6 being rejected.
 
+**V9. Tests for L14** — every new function, with a fake embedder returning fixed vectors (no model download, no network). Required cases: identical vectors score 100; perpendicular and opposite vectors score 0; the embedded text drops the 💎 and normalizes the apostrophe; the rotation never pairs a row with itself; the summary keys; importing `listings.semantic` does not import `sentence_transformers`. **V10. Tests for L15** — a verdict with similarity 1 and 100 is accepted, 0 and 101 rejected; `similarity_80_or_more` on a hand-made set; the printout shows `/100`.
+
 ### Manager
 
 - **M1.** Ask the user whether the `CLAUDE.md` files should be tracked; if yes, remove the `CLAUDE.md` line from `.gitignore`.
@@ -401,7 +433,8 @@ Not tasks until the user agrees.
 - **L10** LLM judge with V7 tests (2026-10-04, uncommitted).
 - **L11** judge follow-ups (2026-10-04, uncommitted).
 - **L12** similarity metric, word-level and judge 1–5 (2026-10-05, uncommitted).
-- **L13** one MLflow run per adapter (2026-10-05, uncommitted; suite at 596).
+- **L1–L13 work above, T5, and the V tasks**: committed and pushed to `main` on 2026-10-05 (`7c97212`, `4aae4c1`, `a6bbe51`, `7f88e34`).
+- **L14** embedding similarity and **L15** judge similarity 1–100 (2026-10-05; suite at 652).
 - **V6** tests for T5, and the L2 part of V3 (2026-10-04, uncommitted; suite at 294).
 
 Earlier history is in `git log`.

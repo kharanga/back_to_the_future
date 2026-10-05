@@ -47,6 +47,7 @@ SIMILARITY (laptop, free)                       python -m listings.similarity
 
   similarity.word_overlap(target, generated)    shared words, 0 to 1, per row of eval.jsonl
   similarity.similarity_summary(rows)           exact-match share, mean and median overlap
+  semantic.semantic_rows(embedder, rows)        meaning similarity 0-100 per row, plus a mismatched-pair floor
   tracking.log_similarity_run(summary)          → the same MLflow run
 
 JUDGE (laptop)                                  python -m listings.judge
@@ -630,7 +631,7 @@ Opens the run that belongs to the adapter folder: the run named in `mlflow_run_i
 | | tracking off | `None` |
 | | no judged rows | raises before any run is opened |
 
-`similarity_metrics(summary)` prefixes the word-level summary with `similarity_`, and `log_similarity_run(summary)` logs it to the adapter's run (`similarity_exact_match`, `similarity_word_overlap_mean`, `similarity_word_overlap_median`, `similarity_rows`); tracking off returns `None`, no rows raises first. The judge's own score is logged as `judge_similarity_mean` and `judge_similarity_4_or_5`.
+`similarity_metrics(summary)` prefixes the word-level summary with `similarity_`, and `log_similarity_run(summary)` logs it to the adapter's run (`similarity_exact_match`, `similarity_word_overlap_mean`, `similarity_word_overlap_median`, `similarity_rows`); tracking off returns `None`, no rows raises first. The judge's own score is logged as `judge_similarity_mean` and `judge_similarity_80_or_more`.
 
 Judging the same model again overwrites the tags and the files and adds a new point to each `judge_` metric. The earlier points stay in the metric history with nothing saying which rubric produced them, so compare judge scores only between runs whose `judge_rubric_hash` tags match.
 
@@ -705,7 +706,7 @@ From 0 (no shared words) to 1 (the same words, in any order). It is the F1 of sh
 | `💎 Y2K Skull Polo Shirt.` | `💎 Y2K Skull Graphic Polo Shirt.` | `0.89` |
 | `💎 Y2K Skull Polo Shirt.` | `💎 Vintage Levi's Jeans.` | `0.0` |
 
-Limits: it counts words, not meaning. `Y2K` and `00's` are different words, `Jean` and `Jeans` are different words, and a wrong Levi's fit number costs one word like any other. The judge's 1–5 `similarity` covers meaning.
+Limits: it counts words, not meaning. `Y2K` and `00's` are different words, `Jean` and `Jeans` are different words, and a wrong Levi's fit number costs one word like any other. The semantic score and the judge's 1–100 `similarity` cover meaning.
 
 ### `scored_row(row)` and `scored_rows(rows)` — Ran
 
@@ -747,6 +748,51 @@ lowest 5 by word overlap:
 
 ---
 
+## `semantic.py` — similarity of meaning, 0 to 100
+
+Word overlap compares spelling. This compares meaning: a small language model (`sentence-transformers/all-MiniLM-L6-v2`) turns each line into 384 numbers, and the score is how closely two lines' numbers point the same way, times 100. Free, runs on the laptop, the same score every run. `python -m listings.similarity` prints and logs it with the word-level numbers.
+
+**How to read the score.** The scale does not start at 0 for this shop: two lines from different listings already score about 69, because they are all vintage clothing titles and most of the val set is Levi's jeans. So read a model's mean against that floor. Sep 30 model: **84.2 against a floor of 69.1**.
+
+**What it misses.** A wrong fit number barely moves it: `Levi's 550 Relaxed Fit Jeans` against `Levi's 545 Loose Fit Jeans` scores 82. The judge's 1–100 score is the one that catches invented numbers.
+
+| Function | Input | Output |
+|---|---|---|
+| `load_embedder()` | nothing | the model (about 7 s; first use downloads about 80 MB). The only place `sentence_transformers` is imported. |
+| `text_to_embed(line)` | `"💎 Vintage 90’s Levi’s 550 Jeans. "` | `"Vintage 90's Levi's 550 Jeans."` (💎 dropped, apostrophes straightened) |
+| `embedded(embedder, lines)` | a list of lines | one vector per line |
+| `vector_length(vector)` | `[3, 4]` | `5.0` |
+| `cosine_similarity(a, b)` | two vectors | 1 same direction, 0 unrelated, negative opposite |
+| `semantic_score(a, b)` | two vectors | cosine × 100, kept between 0 and 100 |
+| `rotated_by_one(items)` | `[a, b, c]` | `[b, c, a]` |
+| `mismatched_scores(target_vectors, generated_vectors)` | the two sets of vectors | each generated line scored against the next row's shop line; empty for a single row |
+| `with_mismatched_score(row, mismatched, index)` | a row | the row plus `semantic_mismatched` when there is one |
+| `semantic_rows(embedder, rows)` | `eval.jsonl` rows | each row plus `semantic` (and `semantic_mismatched`) |
+| `semantic_summary(scored_rows)` | scored rows | `{"semantic_mean": …, "semantic_median": …, "semantic_mismatched_mean": …}` |
+| `lowest_scoring(scored_rows, count)` | scored rows | the five lowest by `semantic` |
+| `summary_lines(summary)`, `pair_lines(row)` | | the printed lines below |
+
+Ran on the Sep 30 model's `eval.jsonl` (160 rows):
+
+```
+semantic mean        84.2 out of 100
+semantic median      84.4
+semantic mismatched  69.1 (each line against another row's shop line)
+
+lowest 5 by semantic score:
+
+ 1157  shop:      💎 Cute Vintage 90's Overall Short.
+       generated: 💎 Vintage 90's Women Overalls.
+       semantic:  50.8
+
+  630  shop:      💎 Vintage Early 00's Mid Wash Levi's 560 Comfort Fit Jeans.
+       generated: 💎 Y2K Levi’s 550 Baggy Jean.
+       semantic:  59.5
+ …
+```
+
+---
+
 ## `judge.py` — Claude compares the generated line with the shop's line
 
 The invariants cannot tell whether a generated line says the same thing as the shop's. This command asks Claude (`claude-haiku-4-5`) to compare the two, text only. Runs on the laptop; needs `ANTHROPIC_API_KEY` in `.env` and an `eval.jsonl` from `python -m listings.eval`.
@@ -774,7 +820,7 @@ row       = {"listing_id": 412, "target": target, "generated": generated}
 | `era_agrees` | bool | the same decade, or both leave it out |
 | `nothing_invented` | bool | the generated line states no specific the shop's line lacks |
 | `key_details_kept` | bool | nothing the shop included is missing |
-| `similarity` | 1 to 5 | how closely the generated line matches: 5 same thing in other words, 4 one minor detail differs, 3 several details differ, 2 a key fact differs (brand, era, fit or model number), 1 a different item |
+| `similarity` | whole number, 1 to 100 | how closely the generated line matches: 90–100 the same thing in other words, 70–89 one minor detail differs, 40–69 several details differ, 15–39 a key fact differs (brand, era, fit or model number), 1–14 a different item. A score outside 1–100, or one that is not a whole number, is recorded as an error row. |
 | `overall` | `equivalent` / `acceptable` / `wrong` | does a buyer learn the same thing |
 | `reason` | str | one sentence |
 
@@ -881,7 +927,7 @@ Output:
  "rows": 2}
 ```
 
-With the 1–5 score, the summary also holds `similarity_mean` and `similarity_4_or_5` (the share of rows scoring 4 or 5); `summary_line(name, value)` formats each line, printing the mean as a number and the rest as percentages. The sample output in this section was captured before `similarity` was added.
+With the 1–100 score, the summary also holds `similarity_mean` and `similarity_80_or_more` (the share of rows scoring 80 or more); the pilot prints each row's score as `similarity 62/100`; `summary_line(name, value)` formats each line, printing the mean as a number and the rest as percentages. The sample output in this section was captured before `similarity` was added.
 
 Rows that errored are not in the rates. An empty list raises `ZeroDivisionError`.
 
