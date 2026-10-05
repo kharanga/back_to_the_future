@@ -1,14 +1,18 @@
-import json
-from pathlib import Path
-
 from unsloth import FastVisionModel, is_bf16_supported
 from unsloth.trainer import UnslothVisionDataCollator
-from PIL import Image
 from torch.utils.data import Dataset
 from trl import SFTConfig, SFTTrainer
 
-from listings import ADAPTER_DIR, PROJECT_ROOT, TRAIN_FILE
-from listings.model import SEED, add_lora_to_language_layers, load_base_model
+from listings import ADAPTER_DIR, PROJECT_ROOT, TRAIN_FILE, tracking
+from listings.examples import open_photo, read_jsonl
+from listings.model import (
+    BASE_MODEL,
+    LORA_RANK,
+    MAX_IMAGE_PIXELS,
+    SEED,
+    add_lora_to_language_layers,
+    load_base_model,
+)
 
 EPOCHS = 3
 LEARNING_RATE = 2e-4
@@ -17,15 +21,17 @@ GRADIENT_ACCUMULATION_STEPS = 4
 MAX_SEQ_LENGTH = 2048
 WARMUP_STEPS = 10
 CHECKPOINT_DIR = PROJECT_ROOT / "adapters" / "checkpoints"
-
-
-def read_jsonl(path: Path) -> list[dict]:
-    with open(path, encoding="utf-8") as f:
-        return [json.loads(line) for line in f]
-
-
-def open_photo(relative_path: str) -> Image.Image:
-    return Image.open(PROJECT_ROOT / relative_path).convert("RGB")
+TRACKED_SETTINGS = {
+    "BASE_MODEL": BASE_MODEL,
+    "LORA_RANK": LORA_RANK,
+    "EPOCHS": EPOCHS,
+    "LEARNING_RATE": LEARNING_RATE,
+    "BATCH_SIZE": BATCH_SIZE,
+    "GRADIENT_ACCUMULATION_STEPS": GRADIENT_ACCUMULATION_STEPS,
+    "MAX_SEQ_LENGTH": MAX_SEQ_LENGTH,
+    "MAX_IMAGE_PIXELS": MAX_IMAGE_PIXELS,
+    "SEED": SEED,
+}
 
 
 def with_loaded_photos(block: dict) -> dict:
@@ -70,7 +76,7 @@ def training_config() -> SFTConfig:
         logging_steps=10,
         save_strategy="epoch",
         seed=SEED,
-        report_to="none",
+        report_to=tracking.report_to(),
         remove_unused_columns=False,
         dataset_text_field="",
         dataset_kwargs={"skip_prepare_dataset": True},
@@ -93,11 +99,13 @@ def main():
         train_dataset=examples,
         args=training_config(),
     )
+    run_id = tracking.start_training_run(TRACKED_SETTINGS)
     trainer.train()
 
     model.save_pretrained(ADAPTER_DIR)
     tokenizer.save_pretrained(ADAPTER_DIR)
     print(f"adapter saved to {ADAPTER_DIR}")
+    tracking.finish_training_run(run_id)
 
 
 if __name__ == "__main__":

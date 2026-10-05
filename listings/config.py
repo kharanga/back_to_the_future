@@ -15,3 +15,7 @@ POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
 AWS_REGION = os.environ.get("AWS_REGION")
 S3_BUCKET = os.environ.get("S3_BUCKET")
 S3_PREFIX = os.environ.get("S3_PREFIX", "")
+
+MLFLOW_TRACKING_URI = os.environ.get("MLFLOW_TRACKING_URI")
+
+ANTHROPIC_API_KEY_IS_SET = bool(os.environ.get("ANTHROPIC_API_KEY", "").strip())
