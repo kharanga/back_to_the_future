@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Literal
 
 import anthropic
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, Field, ValidationError
 
 from listings import EVAL_FILE, JUDGE_FILE, VAL_FILE, config, tracking
 from listings.examples import facts, read_jsonl
@@ -13,7 +13,9 @@ JUDGE_MODEL = "claude-haiku-4-5"
 MAX_TOKENS = 1024
 CHECK_NAMES = ["same_item", "brand_agrees", "era_agrees", "nothing_invented", "key_details_kept"]
 OVERALL_VALUES = ["equivalent", "acceptable", "wrong"]
-HIGH_SIMILARITY = 4
+LOWEST_SIMILARITY = 1
+HIGHEST_SIMILARITY = 100
+HIGH_SIMILARITY = 80
 FAILED_STOP_REASONS = {"refusal", "max_tokens"}
 PROGRESS_EVERY = 20
 MISSING_API_KEY_MESSAGE = "ANTHROPIC_API_KEY is missing or blank in .env, so no row was judged."
@@ -32,12 +34,12 @@ Answer every field:
 - era_agrees: true when both lines give the same decade, or both leave it out. "Y2K" and "2000's" are the same decade.
 - nothing_invented: true when the generated line states no specific that the shop's line lacks, such as a fit number, a team, a graphic, a size or a material.
 - key_details_kept: true when nothing the shop included is missing from the generated line, such as a wash, a fit, a color or a graphic.
-- similarity: a whole number from 1 to 5 for how closely the generated line matches the shop's line.
-  5: a buyer learns exactly the same thing; only wording or word order differs.
-  4: the same item, with one minor detail added, dropped, or changed.
-  3: the same item, with several details different or missing.
-  2: the same kind of garment, but a key fact differs (brand, era, fit or model number).
-  1: a different item.
+- similarity: a whole number from 1 to 100 for how closely the generated line matches the shop's line.
+  90 to 100: a buyer learns exactly the same thing; only wording or word order differs.
+  70 to 89: the same item, with one minor detail added, dropped, or changed.
+  40 to 69: the same item, with several details different or missing.
+  15 to 39: the same kind of garment, but a key fact differs (brand, era, fit or model number).
+  1 to 14: a different item.
 - overall: "equivalent" when a buyer learns the same thing from both lines. "acceptable" when there are minor differences and nothing in the generated line is false. "wrong" when the generated line describes a different item, gives a wrong brand or era, or states an invented specific.
 - reason: one sentence saying what decided the overall value.
 
@@ -50,7 +52,7 @@ class Verdict(BaseModel):
     era_agrees: bool
     nothing_invented: bool
     key_details_kept: bool
-    similarity: Literal[1, 2, 3, 4, 5]
+    similarity: int = Field(ge=LOWEST_SIMILARITY, le=HIGHEST_SIMILARITY, strict=True)
     overall: Literal["equivalent", "acceptable", "wrong"]
     reason: str
 
@@ -169,14 +171,14 @@ def judge_summary(judged_rows: list[dict]) -> dict:
     }
     similarity = {
         "similarity_mean": sum(row["similarity"] for row in judged_rows) / total,
-        "similarity_4_or_5": sum(row["similarity"] >= HIGH_SIMILARITY for row in judged_rows) / total,
+        "similarity_80_or_more": sum(row["similarity"] >= HIGH_SIMILARITY for row in judged_rows) / total,
     }
     return {**check_rates, **similarity, **overall_shares, "rows": total}
 
 
 def summary_line(name: str, value: float) -> str:
     if name == "similarity_mean":
-        return f"{name:<20} {value:.2f} out of 5"
+        return f"{name:<20} {value:.1f} out of 100"
     return f"{name:<20} {value:.1%}"
 
 
@@ -195,7 +197,7 @@ def verdict_lines(row: dict) -> list[str]:
     return [
         f"{row['listing_id']:>5}  shop:      {row['target']}",
         f"       generated: {row['generated']}",
-        f"       verdict:   {row['overall']}, similarity {row['similarity']}/5 (failed: {', '.join(failed_checks) or 'none'})",
+        f"       verdict:   {row['overall']}, similarity {row['similarity']}/100 (failed: {', '.join(failed_checks) or 'none'})",
         f"       reason:    {row['reason']}",
         "",
     ]

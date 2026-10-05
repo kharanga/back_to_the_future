@@ -60,7 +60,7 @@ EQUIVALENT = Verdict(
     era_agrees=True,
     nothing_invented=True,
     key_details_kept=True,
-    similarity=5,
+    similarity=95,
     overall="equivalent",
     reason="Same hoodie, brand and decade.",
 )
@@ -70,7 +70,7 @@ INVENTED_FIT_NUMBER = Verdict(
     era_agrees=True,
     nothing_invented=False,
     key_details_kept=False,
-    similarity=2,
+    similarity=30,
     overall="wrong",
     reason="The generated line adds a 550 fit number and drops the stonewash.",
 )
@@ -83,7 +83,7 @@ RUSSELL_JUDGED_ROW = {
     "era_agrees": True,
     "nothing_invented": True,
     "key_details_kept": True,
-    "similarity": 5,
+    "similarity": 95,
     "overall": "equivalent",
     "reason": "Same hoodie, brand and decade.",
 }
@@ -96,7 +96,7 @@ LEVIS_JUDGED_ROW = {
     "era_agrees": True,
     "nothing_invented": False,
     "key_details_kept": False,
-    "similarity": 2,
+    "similarity": 30,
     "overall": "wrong",
     "reason": "The generated line adds a 550 fit number and drops the stonewash.",
 }
@@ -106,8 +106,8 @@ HALF_WRONG_SUMMARY = {
     "era_agrees": 1.0,
     "nothing_invented": 0.5,
     "key_details_kept": 0.5,
-    "similarity_mean": 3.5,
-    "similarity_4_or_5": 0.5,
+    "similarity_mean": 62.5,
+    "similarity_80_or_more": 0.5,
     "overall_equivalent": 0.5,
     "overall_acceptable": 0.0,
     "overall_wrong": 0.5,
@@ -161,6 +161,13 @@ def response_stopped_by(stop_reason: str) -> SimpleNamespace:
     return SimpleNamespace(
         parsed_output=None, stop_reason=stop_reason, usage=SimpleNamespace(input_tokens=400, output_tokens=5)
     )
+
+
+def similarity_out_of_range_error() -> ValidationError:
+    answer_scoring_101 = json.dumps({**EQUIVALENT.model_dump(), "similarity": 101})
+    with pytest.raises(ValidationError) as raised:
+        Verdict.model_validate_json(answer_scoring_101)
+    return raised.value
 
 
 def truncated_json_error() -> ValidationError:
@@ -232,10 +239,16 @@ def test_verdict_lists_the_five_checks_then_similarity_overall_and_reason():
     ]
 
 
-@pytest.mark.parametrize("similarity_out_of_range", [0, 6, 3.5, "4"])
-def test_verdict_rejects_a_similarity_that_is_not_a_whole_number_from_one_to_five(similarity_out_of_range):
+@pytest.mark.parametrize("similarity_at_an_end_of_the_scale", [1, 100])
+def test_verdict_accepts_a_similarity_at_either_end_of_one_to_one_hundred(similarity_at_an_end_of_the_scale):
+    verdict = Verdict(**{**EQUIVALENT.model_dump(), "similarity": similarity_at_an_end_of_the_scale})
+    assert verdict.similarity == similarity_at_an_end_of_the_scale
+
+
+@pytest.mark.parametrize("similarity_not_allowed", [0, 101, 62.5, 62.0, "62", True])
+def test_verdict_rejects_a_similarity_that_is_not_a_whole_number_from_one_to_one_hundred(similarity_not_allowed):
     with pytest.raises(ValidationError):
-        Verdict(**{**EQUIVALENT.model_dump(), "similarity": similarity_out_of_range})
+        Verdict(**{**EQUIVALENT.model_dump(), "similarity": similarity_not_allowed})
 
 
 def test_verdict_rejects_an_overall_value_outside_the_three_allowed():
@@ -422,6 +435,14 @@ def test_judge_row_records_a_truncated_answer_the_sdk_could_not_parse_as_an_erro
     assert outcome.error_row["error"].startswith("ValidationError: ")
 
 
+def test_judge_row_records_an_answer_scoring_outside_one_to_one_hundred_as_an_error_row():
+    outcome = judge_row(client_answering(similarity_out_of_range_error()), RUSSELL_EVAL_ROW, FACTS_BY_ID)
+    assert (outcome.judged_row, outcome.error_row) == (
+        None,
+        {"listing_id": 7, "error": "ValidationError: 1 validation error for Verdict"},
+    )
+
+
 def test_judge_row_lets_an_error_that_is_not_from_the_api_through():
     with pytest.raises(KeyError):
         judge_row(client_answering(KeyError("a bug, not an API error")), RUSSELL_EVAL_ROW, FACTS_BY_ID)
@@ -494,10 +515,10 @@ def test_judge_summary_is_each_check_rate_each_overall_share_and_the_row_count()
     assert judge_summary([RUSSELL_JUDGED_ROW, LEVIS_JUDGED_ROW]) == HALF_WRONG_SUMMARY
 
 
-def test_judge_summary_gives_the_mean_similarity_and_the_share_scoring_four_or_five():
-    rows = [{**RUSSELL_JUDGED_ROW, "similarity": similarity} for similarity in (5, 2, 4)]
+def test_judge_summary_gives_the_mean_similarity_and_the_share_scoring_eighty_or_more():
+    rows = [{**RUSSELL_JUDGED_ROW, "similarity": similarity} for similarity in (62, 80, 95)]
     summary = judge_summary(rows)
-    assert (round(summary["similarity_mean"], 2), round(summary["similarity_4_or_5"], 3)) == (3.67, 0.667)
+    assert (summary["similarity_mean"], round(summary["similarity_80_or_more"], 3)) == (79.0, 0.667)
 
 
 def test_judge_summary_leaves_refused_and_failed_rows_out_of_the_rates():
@@ -516,8 +537,8 @@ def test_summary_line_shows_a_rate_as_a_percentage():
     assert summary_line("same_item", 0.5) == "same_item            50.0%"
 
 
-def test_summary_line_shows_the_mean_similarity_out_of_five():
-    assert summary_line("similarity_mean", 3.6667) == "similarity_mean      3.67 out of 5"
+def test_summary_line_shows_the_mean_similarity_out_of_one_hundred():
+    assert summary_line("similarity_mean", 79.0) == "similarity_mean      79.0 out of 100"
 
 
 def test_summary_lines_are_the_rates_then_row_error_and_token_counts():
@@ -532,8 +553,8 @@ def test_summary_lines_are_the_rates_then_row_error_and_token_counts():
         "era_agrees           100.0%",
         "nothing_invented     50.0%",
         "key_details_kept     50.0%",
-        "similarity_mean      3.50 out of 5",
-        "similarity_4_or_5    50.0%",
+        "similarity_mean      62.5 out of 100",
+        "similarity_80_or_more 50.0%",
         "overall_equivalent   50.0%",
         "overall_acceptable   0.0%",
         "overall_wrong        50.0%",
@@ -548,14 +569,14 @@ def test_verdict_lines_show_the_shop_line_the_generated_line_the_verdict_and_the
     assert verdict_lines(LEVIS_JUDGED_ROW) == [
         "    8  shop:      💎 Vintage 90's Levi's Stonewash Jeans.",
         "       generated: 💎 Vintage 90's Levi's 550 Jeans.",
-        "       verdict:   wrong, similarity 2/5 (failed: nothing_invented, key_details_kept)",
+        "       verdict:   wrong, similarity 30/100 (failed: nothing_invented, key_details_kept)",
         "       reason:    The generated line adds a 550 fit number and drops the stonewash.",
         "",
     ]
 
 
 def test_verdict_lines_say_none_failed_when_every_check_passed():
-    assert verdict_lines(RUSSELL_JUDGED_ROW)[2] == "       verdict:   equivalent, similarity 5/5 (failed: none)"
+    assert verdict_lines(RUSSELL_JUDGED_ROW)[2] == "       verdict:   equivalent, similarity 95/100 (failed: none)"
 
 
 def test_error_lines_are_one_not_judged_line_per_error_row():
