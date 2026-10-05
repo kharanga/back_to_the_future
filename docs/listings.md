@@ -818,13 +818,25 @@ row       = {"listing_id": 412, "target": target, "generated": generated}
 | `same_item` | bool | the same kind of garment |
 | `brand_agrees` | bool | the same brand named, or both leave it out |
 | `era_agrees` | bool | the same decade, or both leave it out |
-| `nothing_invented` | bool | the generated line states no specific the shop's line lacks |
-| `key_details_kept` | bool | nothing the shop included is missing |
+| `details_added` | list of text | each specific the generated line states that the shop's line does not, such as `["Striped"]`; empty when none |
+| `details_dropped` | list of text | each specific the shop's line states that the generated line does not, such as `["Big Logo"]`; empty when none |
 | `similarity` | whole number, 1 to 100 | how closely the generated line matches: 90–100 the same thing in other words, 70–89 one minor detail differs, 40–69 several details differ, 15–39 a key fact differs (brand, era, fit or model number), 1–14 a different item. A score outside 1–100, or one that is not a whole number, is recorded as an error row. |
 | `overall` | `equivalent` / `acceptable` / `wrong` | does a buyer learn the same thing |
 | `reason` | str | one sentence |
 
-The full instructions given to the judge are the `RUBRIC` constant at the top of `listings/judge.py`. It is a draft until a pilot has been read and agreed.
+The full instructions given to the judge are the `RUBRIC` constant at the top of `listings/judge.py`. Restating the garment type, singular versus plural, another spelling of the same brand, and the same decade written differently are not differences. The summary reports `nothing_added` and `nothing_dropped`, the share of rows whose list is empty.
+
+The sample outputs further down this section were captured with the first version of the verdict (two yes/no checks where the lists are now, no similarity score). A real pilot row today prints:
+
+```
+ 1119  shop:      💎 Y2K USPA Big Logo Polo Shirts.
+       generated: 💎 Y2K U.S. Polo Assn Polo Shirt.
+       verdict:   acceptable, similarity 75/100 (failed: none)
+       added: none | dropped: Big Logo
+       reason:    Both lines describe the same Y2K U.S. Polo Assn. polo shirt, but the generated line omits the 'Big Logo' detail …
+```
+
+Real results for the Sep 30 model (160 rows): similarity mean 58.8; Levi's jeans 48.0, everything else 77.2.
 
 ### `judge_prompt(item_facts, target, generated)` — Ran
 
