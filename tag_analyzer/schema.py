@@ -13,3 +13,9 @@ class TagMatch(BaseModel):
     neighbors: list[Neighbor]
     in_library: bool
 
+class EvalScore(BaseModel):
+    test_set_size: int
+    correct_brand: int
+    correct_era: int
+    mistakes: list[str]
+

@@ -15,6 +15,7 @@ from tag_analyzer.schema import Neighbor
 load_dotenv(PROJECT_ROOT / ".env")
 
 COLLECTION = "TagPhoto"
+CLIP_MODEL = "clip-ViT-B-32-multilingual-v1"
 IMAGE_PROPERTY = "image"
 LABEL_PROPERTIES = ["filename", "brand", "era"]
 UPLOAD_BATCH_SIZE = 20
