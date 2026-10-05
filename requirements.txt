@@ -9,3 +9,4 @@ python-dotenv
 mlflow-skinny==3.16.1
 pandas
 anthropic==1.11.0
+sentence-transformers==6.1.0

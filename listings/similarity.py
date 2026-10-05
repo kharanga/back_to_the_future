@@ -2,7 +2,7 @@ import re
 import statistics
 from collections import Counter
 
-from listings import EVAL_FILE, tracking
+from listings import EVAL_FILE, semantic, tracking
 from listings.examples import read_jsonl
 
 APOSTROPHES = str.maketrans("", "", "'\u2019")
@@ -78,10 +78,15 @@ def pair_lines(row: dict) -> list[str]:
 def main():
     rows = read_jsonl(EVAL_FILE)
     summary = similarity_summary(rows)
-    print("\n".join(summary_lines(summary)))
+    semantic_scored = semantic.semantic_rows(semantic.load_embedder(), rows)
+    summary = {**summary, **semantic.semantic_summary(semantic_scored)}
+    print("\n".join(summary_lines(summary) + semantic.summary_lines(summary)))
     print(f"\nlowest {LOWEST_PAIRS_SHOWN} by word overlap:\n")
     for row in lowest_scoring(rows):
         print("\n".join(pair_lines(row)))
+    print(f"lowest {semantic.LOWEST_PAIRS_SHOWN} by semantic score:\n")
+    for row in semantic.lowest_scoring(semantic_scored):
+        print("\n".join(semantic.pair_lines(row)))
     tracking.log_similarity_run(summary)
 
 

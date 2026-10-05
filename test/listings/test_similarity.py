@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from listings import config, similarity, tracking
+from listings import config, semantic, similarity, tracking
 from listings.similarity import (
     exact_match,
     lowest_scoring,
@@ -19,11 +19,42 @@ SAME_WORDS_ROW = {"listing_id": 1, "target": "💎 Vintage Nike Tee.", "generate
 HALF_SHARED_ROW = {"listing_id": 2, "target": "💎 Vintage Nike.", "generated": "💎 Vintage Adidas."}
 NOTHING_SHARED_ROW = {"listing_id": 3, "target": "💎 Hoodie.", "generated": "💎 Jeans."}
 THREE_ROWS = [SAME_WORDS_ROW, HALF_SHARED_ROW, NOTHING_SHARED_ROW]
+VECTOR_FOR_TEXT = {
+    "Vintage Nike Tee.": [1, 0],
+    "Vintage Nike.": [1, 0],
+    "Vintage Adidas.": [3, 4],
+    "Hoodie.": [1, 0],
+    "Jeans.": [0, 1],
+}
+SEMANTIC_PAIRS_LOWEST_FIRST = [
+    "    3  shop:      💎 Hoodie.",
+    "       generated: 💎 Jeans.",
+    "       semantic:  0.0",
+    "",
+    "    2  shop:      💎 Vintage Nike.",
+    "       generated: 💎 Vintage Adidas.",
+    "       semantic:  60.0",
+    "",
+    "    1  shop:      💎 Vintage Nike Tee.",
+    "       generated: 💎 Vintage Nike Tee.",
+    "       semantic:  100.0",
+    "",
+]
+
+
+class FakeEmbedder:
+    def encode(self, texts, normalize_embeddings):
+        return [VECTOR_FOR_TEXT[text] for text in texts]
 
 
 @pytest.fixture(autouse=True)
 def tracking_off(monkeypatch):
     monkeypatch.setattr(config, "MLFLOW_TRACKING_URI", None)
+
+
+@pytest.fixture(autouse=True)
+def fake_embedder(monkeypatch):
+    monkeypatch.setattr(semantic, "load_embedder", FakeEmbedder)
 
 
 @pytest.fixture
@@ -163,13 +194,23 @@ def test_pair_lines_show_the_shop_line_the_generated_line_and_the_overlap():
     ]
 
 
-def test_main_prints_the_summary_then_the_lowest_pairs_lowest_first(eval_file, similarity_run_log, capsys):
+def test_main_prints_the_word_level_summary_then_the_semantic_summary(eval_file, similarity_run_log, capsys):
     eval_file(THREE_ROWS)
     similarity.main()
-    assert capsys.readouterr().out.splitlines() == [
+    assert capsys.readouterr().out.splitlines()[:6] == [
         "exact match          1/3 = 33.3%",
         "word overlap mean    0.500",
         "word overlap median  0.500",
+        "semantic mean        53.3 out of 100",
+        "semantic median      60.0",
+        "semantic mismatched  53.3 (each line against another row's shop line)",
+    ]
+
+
+def test_main_prints_the_lowest_pairs_by_word_overlap_lowest_first(eval_file, similarity_run_log, capsys):
+    eval_file(THREE_ROWS)
+    similarity.main()
+    assert capsys.readouterr().out.splitlines()[6:21] == [
         "",
         "lowest 5 by word overlap:",
         "",
@@ -179,10 +220,30 @@ def test_main_prints_the_summary_then_the_lowest_pairs_lowest_first(eval_file, s
     ]
 
 
-def test_main_hands_the_summary_to_the_similarity_run_log(eval_file, similarity_run_log):
+def test_main_prints_the_lowest_pairs_by_semantic_score_last(eval_file, similarity_run_log, capsys):
     eval_file(THREE_ROWS)
     similarity.main()
-    assert similarity_run_log == [similarity_summary(THREE_ROWS)]
+    assert capsys.readouterr().out.splitlines()[21:] == [
+        "lowest 5 by semantic score:",
+        "",
+        *SEMANTIC_PAIRS_LOWEST_FIRST,
+    ]
+
+
+def test_main_hands_the_word_level_and_semantic_summary_to_the_similarity_run_log(eval_file, similarity_run_log):
+    eval_file(THREE_ROWS)
+    similarity.main()
+    assert similarity_run_log == [
+        {
+            "exact_match": 1 / 3,
+            "word_overlap_mean": 0.5,
+            "word_overlap_median": 0.5,
+            "rows": 3,
+            "semantic_mean": pytest.approx(53.333, abs=0.001),
+            "semantic_median": pytest.approx(60.0),
+            "semantic_mismatched_mean": pytest.approx(53.333, abs=0.001),
+        }
+    ]
 
 
 def test_main_only_prints_when_tracking_is_off(eval_file, capsys):
@@ -191,7 +252,10 @@ def test_main_only_prints_when_tracking_is_off(eval_file, capsys):
     assert capsys.readouterr().out.startswith("exact match          1/3 = 33.3%")
 
 
-def test_main_raises_before_logging_when_the_eval_file_has_no_rows(eval_file, similarity_run_log):
+def test_main_raises_before_loading_the_model_or_logging_when_the_eval_file_has_no_rows(
+    eval_file, similarity_run_log, monkeypatch
+):
+    monkeypatch.setattr(semantic, "load_embedder", lambda: pytest.fail("the model was loaded with no rows"))
     eval_file([])
     with pytest.raises(ZeroDivisionError):
         similarity.main()
